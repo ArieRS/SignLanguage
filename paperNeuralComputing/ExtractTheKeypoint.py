@@ -309,5 +309,5 @@ if __name__ == "__main__":
     '''
 
     objectExtract.extractVideoData(pathWorkspace, filePathTesting, DATA_PATH_TESTING_SAVE, PATH_TESTING_CSV, option=2)
-    objectExtract.extractVideoData(pathWorkspace, filePathTraining, PATH_TRAINING_CSV, option=2)
+    objectExtract.extractVideoData(pathWorkspace, filePathTraining, PATH_TRAINING_CSV, PATH_TRAINING_CSV, option=2)
     objectExtract.extractVideoData(pathWorkspace, filePathValidation, DATA_PATH_VALIDATION_SAVE, PATH_VALIDATION_CSV, option=2)
