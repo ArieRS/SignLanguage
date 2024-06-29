@@ -1,205 +1,138 @@
 import numpy as np
 import os
 import os.path
-import tslearn
-from tslearn.preprocessing import TimeSeriesResampler
+# from tslearn.preprocessing import TimeSeriesResampler
+# import tensorflow as tf
+
 
 class LoadExtractedKeypoint:
+    maxFrame = 0
 
-  def LoadKeypoint(self, pathWorkspace, folder_path_keypoint, file_name_data_numpy, file_name_label_numpy):
-    
-    xTemp = []
-    yTemp = []
-  
-    DATA_PATH_KEYPOINT = os.path.join (pathWorkspace, folder_path_keypoint)
-    
-    actionsVideoInput = np.array(os.listdir(DATA_PATH_KEYPOINT))
-     
-    for action in actionsVideoInput:
-      print ("action = {}".format(action))
-      for actionSubFolder in np.array(os.listdir(os.path.join(DATA_PATH_KEYPOINT, action))):
-        sequences = 0
-        window = []
-        tempSequencesWhichExist = 0
-        # list all npy file for each frame in the video
-        allKeyPointData = os.listdir(os.path.join(DATA_PATH_KEYPOINT, action, actionSubFolder))
-        for _ in range (len(allKeyPointData)): 
-            pathFile = os.path.join(DATA_PATH_KEYPOINT, action, actionSubFolder, "{}.npy".format(sequences))
-          
-            # if file not exist take the previous keypoint 
-            if (os.path.isfile(pathFile)==False):
-              pathFile = os.path.join(DATA_PATH_KEYPOINT, action, actionSubFolder, "{}.npy".format(tempSequencesWhichExist))
-            else:
-              tempSequencesWhichExist = sequences
-            
-            res = np.load(pathFile)
-            window.append(res)
-            sequences +=1
+    def setMaxFrame(self, lenghtFrame=0):
+        if (lenghtFrame > self.maxFrame):
+            self.maxFrame = lenghtFrame
+
+    def getMaxFrame(self):
+        return self.maxFrame
+   
+    def LoadKeypoint(self, pathWorkspace, folder_path_keypoint,
+                     file_name_data_numpy, file_name_label_numpy):
+        xTemp = []
+        newXTemp = []
+        yTemp = []
+        DATA_PATH_KEYPOINT = os.path.join(pathWorkspace, folder_path_keypoint)
+        actionsVideoInput = np.array(os.listdir(DATA_PATH_KEYPOINT))
+
+        for action in actionsVideoInput:
+            print("action = {}".format(action))
+            for actionSubFolder in np.array(os.listdir(os.path.join(DATA_PATH_KEYPOINT, action))):
+                sequences = 1
+                window = []
+                tempSequencesWhichExist = 0
+                # list all npy file for each frame in the video
+                allKeyPointData = os.listdir(os.path.join(DATA_PATH_KEYPOINT,
+                                                          action,
+                                                          actionSubFolder))
+                print(f'{allKeyPointData =}')
+                for _ in range(len(allKeyPointData)): 
+                    print(f'{_}')
+                    pathFile = os.path.join(DATA_PATH_KEYPOINT, action,
+                                            actionSubFolder,
+                                            "{}.npy".format(sequences))
+                    
+                    print(f'{pathFile=}')
+                  
+                    # if file not exist take the previous keypoint 
+                    if (os.path.isfile(pathFile) is False):
+                        pathFile = os.path.join(DATA_PATH_KEYPOINT, action,
+                                                actionSubFolder, 
+                                                "{}.npy".format(tempSequencesWhichExist))
+                    else:
+                        tempSequencesWhichExist = sequences
+                    
+                    res = np.load(pathFile)
+                    window.append(res)
+                    sequences += 1
+                
+                # ### interpolation in here
+                # window        = np.asarray(window, dtype=object)
+                # array_reshape = np.reshape(window, window.shape[0]* window.shape[1])
+                # size          = 78 * window.shape[1]
+                # result_interpolation  = TimeSeriesResampler(sz = size).fit_transform(array_reshape) 
+                # final_window  = np.reshape(result_interpolation, (78, window.shape[1]))
+                # window = np.array(window,dtype=object)
+                # final_window  = np.transpose(window,[1,0])
+                final_window = np.asarray(window)
+                # print (f'{np.asarray(final_window).shape=}')
+
+                self.setMaxFrame(lenghtFrame=final_window.shape[0])
+                xTemp.append(final_window)
+                yTemp.append(action)
         
-        ### interpolation in here
-        window        = np.asarray(window, dtype=object)
-        array_reshape = np.reshape(window, window.shape[0]* window.shape[1])
-        size          = 78 * window.shape[1]
-        result_interpolation  = TimeSeriesResampler(sz = size).fit_transform(array_reshape) 
-        final_window  = np.reshape(result_interpolation, (78, window.shape[1]))
+        # process padding
+        print(f'{self.getMaxFrame()=}')
+        print(len(xTemp))
+        # xTemp = np.asarray(xTemp)
+        for jj in range(len(xTemp)):
+            tempTranspose = np.transpose(xTemp[jj], [1, 0])
+            lenghtPadding = self.getMaxFrame() - tempTranspose.shape[1]
+            paddResult = np.pad(tempTranspose, ((0, 0), (0, lenghtPadding)), constant_values=0)
+            paddResult = np.transpose(paddResult, [1, 0])
+            newXTemp.append(paddResult)
 
-        xTemp.append(final_window)
-        yTemp.append(action)
-    
-    ### save keypoint
-    pathKeypoint = os.path.join(pathWorkspace,'DataSaveOnNumpy',file_name_data_numpy)
-    np.save (pathKeypoint, xTemp)
-    pathLabel = os.path.join(pathWorkspace,'DataSaveOnNumpy',file_name_label_numpy)
-    np.save (pathLabel, yTemp) 
-  
+        print(f'{self.getMaxFrame()=}') 
+        # save keypoint
+        pathKeypoint = os.path.join(pathWorkspace, 'DataSaveOnNumpy', 
+                                    file_name_data_numpy)
+        # np.save (pathKeypoint, xTemp)
+        np.save(pathKeypoint, newXTemp)
+        print(np.asarray(newXTemp).shape)
+        pathLabel = os.path.join(pathWorkspace, 'DataSaveOnNumpy', 
+                                 file_name_label_numpy)
+        np.save(pathLabel, yTemp) 
+
+
 if __name__ == "__main__":
-  BASE_Dir = "/home/bra1n/Documents/signLanguage"
-  PATH_WORKSPACE = '/home/tamlab/Documents/SignLanguage/CodeInServer/Project2'
- 
-  # FOLDER_PATH_TRAINING  = 'KeypointTrainingWLASL100'
-  # FOLDER_PATH_TESTING   = 'KeypointTestingWLASL100'
+    PATH_WORKSPACE = '/home/bra1n/Documents/signLanguage/paperNeuralComputing'
 
-  FOLDER_PATH_TRAINING = 'KeypointTrainingWLASL100_option2'
-  FOLDER_PATH_TESTING = 'KeypointTestingWLASL100_option2'
+    FOLDER_PATH_TRAINING = 'KeypointTrainingWLASL100_normalization_option2'
+    FOLDER_PATH_VALIDATION = 'KeypointValidationWLASL100_normalization_option2'
+    FOLDER_PATH_TESTING = 'KeypointTestingWLASL100_normalization_option2'
 
-  FILE_NAME_TRAINING_NUMPY = 'TrainingAllFrame_WLASL_100Class_option2'
-  FILE_NAME_LABEL_TRAINING_NUMPY = 'TrainingLabelAllFrame_WLASL_100Class_option2'
+    FILE_NAME_TRAINING_NUMPY = 'TrainingAllFrame_WLASL_100Class_option2'
+    FILE_NAME_LABEL_TRAINING_NUMPY = 'TrainingLabelAllFrame_WLASL_100Class_option2'
 
-  FILE_NAME_TEST_NUMPY = 'TestingAllFrame_WLASL_100Class_option2'
-  FILE_NAME_LABEL_TEST_NUMPY = 'TestingLabelAllFrame_WLASL_100Class_option2'
+    FILE_NAME_VALIDATION_NUMPY = 'ValidationAllFrame_WLASL_100Class_option2'
+    FILE_NAME_LABEL_VALIDATION_NUMPY = 'ValidationLabelAllFrame_WLASL_100Class_option2'
 
-  FOLDER_SAVE_NUMPY = os.path.join(PATH_WORKSPACE, 'DataSaveOnNumpy')
-  if not os.path.exists(FOLDER_SAVE_NUMPY):
-    os.makedirs(FOLDER_SAVE_NUMPY)
+    FILE_NAME_TEST_NUMPY = 'TestingAllFrame_WLASL_100Class_option2'
+    FILE_NAME_LABEL_TEST_NUMPY = 'TestingLabelAllFrame_WLASL_100Class_option2'
 
-  sequencesTraining = []
-  labelsTraining = []
-  sequencesTesting = []
-  labelsTesting = []
+    FOLDER_SAVE_NUMPY = os.path.join(PATH_WORKSPACE, 'DataSaveOnNumpy')
+    if not os.path.exists(FOLDER_SAVE_NUMPY):
+        os.makedirs(FOLDER_SAVE_NUMPY)
 
-  tempLoadExtractedKeypoint = LoadExtractedKeypoint()
+    sequencesTraining = []
+    labelsTraining = []
+    sequencesTesting = []
+    labelsTesting = []
 
-  tempLoadExtractedKeypoint.LoadKeypoint(
-                              PATH_WORKSPACE, 
-                              FOLDER_PATH_TRAINING, 
-                              FILE_NAME_TRAINING_NUMPY, 
-                              FILE_NAME_LABEL_TRAINING_NUMPY)
-  
-  tempLoadExtractedKeypoint.LoadKeypoint(
-                              PATH_WORKSPACE, 
-                              FOLDER_PATH_TESTING, 
-                              FILE_NAME_TEST_NUMPY, 
-                              FILE_NAME_LABEL_TEST_NUMPY)
+    tempLoadExtractedKeypoint = LoadExtractedKeypoint()
 
-  # ### list training folder
-  # actionsTraining = np.array(os.listdir(DATA_PATH_KEYPOINT_TRAINING))
-  # print("Load data in process ")
-
-  # ### hard code the array length because the array has different step
-  # ### xTraining =  np.empty(1780, dtype=object)
-  # ### yTraining =  np.empty(1780, dtype=object)
-  # xTraining = []
-  # yTraining = []
-  # indexVideoTraining = 0
-
-
-  # for action in actionsTraining:
-  #   print ("action = {}".format(action))
-  #   for actionSubFolder in np.array(os.listdir(os.path.join(DATA_PATH_KEYPOINT_TRAINING, action))):
-  #     sequences = 0
-  #     window = []
-  #     tempSequencesWhichExist = 0
-  #     print (actionSubFolder)
-  #     ### list all npy file for each frame in the video
-  #     allKeyPointData = os.listdir(os.path.join(DATA_PATH_KEYPOINT_TRAINING, action, actionSubFolder))
-  #     for _ in range (len(allKeyPointData)): 
-  #         pathFile = os.path.join(DATA_PATH_KEYPOINT_TRAINING, action, actionSubFolder, "{}.npy".format(sequences))
-        
-  #         # if file not exist take the previous keypoint 
-  #         if (os.path.isfile(pathFile)==False):
-  #           pathFile = os.path.join(DATA_PATH_KEYPOINT_TRAINING, action, actionSubFolder, "{}.npy".format(tempSequencesWhichExist))
-  #         else:
-  #           tempSequencesWhichExist = sequences
-          
-  #         res = np.load(pathFile)
-  #         window.append(res)
-  #         sequences +=1
-  #         # print("window  = ",np.array(window).shape)
-  #     ### sequencesTraining.append(window)
-  #     ### labelsTraining.append(action)
-  #     ### xTraining[indexVideoTraining] = window
-  #     ### yTraining[indexVideoTraining] = action
-
-  #     ### interpolation in here
-  #     window        = np.asarray(window, dtype=object)
-  #     array_reshape = np.reshape(window, window.shape[0]* window.shape[1])
-  #     size          = 78 * window.shape[1]
-  #     result_interpolation  = TimeSeriesResampler(sz = size).fit_transform(array_reshape) 
-  #     final_window  = np.reshape(result_interpolation, (78, window.shape[1]))
+    tempLoadExtractedKeypoint.LoadKeypoint(
+                                PATH_WORKSPACE,
+                                FOLDER_PATH_TRAINING,
+                                FILE_NAME_TRAINING_NUMPY,
+                                FILE_NAME_LABEL_TRAINING_NUMPY)
     
-  #     xTraining.append(final_window)
-  #     yTraining.append(action)
-
-  #     indexVideoTraining += 1
-  #     ### print("Shape each frame = ",np.array(sequencesTraining).shape)
-  #     ### print("Label each video = ",np.array(labelsTraining).shape)
+    tempLoadExtractedKeypoint.LoadKeypoint(
+                                PATH_WORKSPACE,
+                                FOLDER_PATH_VALIDATION,
+                                FILE_NAME_VALIDATION_NUMPY,
+                                FILE_NAME_LABEL_TRAINING_NUMPY)
     
-  # ## save keypoint
-  # pathKeypoint  = os.path.join(pathWorkspace, 'DataSaveOnNumpy',  PATH_SAVE_TRAINING_NUMPY)
-  # np.save (pathKeypoint, xTraining)
-  # pathLabel     = os.path.join(pathWorkspace, 'DataSaveOnNumpy',  PATH_SAVE_LABEL_TRAINING_NUMPY)
-  # np.save (pathLabel, yTraining) 
-
-  # ###data Testing
-  # print("Load data in process ")
-  # # list testing folder
-  # actionsTesting  = np.array(os.listdir(DATA_PATH_KEYPOINT_TESTING))
-
-  # ### xTesting = np.empty(258, dtype=object)
-  # ### yTesting = np.empty(258, dtype=object)
-  # xTesting = []
-  # yTesting = []
-  # indexVideoTesting = 0
-  
-  # for action in actionsTesting:
-  #   for actionSubFolder in np.array(os.listdir(os.path.join(DATA_PATH_KEYPOINT_TESTING, action))):
-  #     sequences = 0
-  #     window = []
-  #     tempSequencesWhichExist = 0
-  #     allKeyPointData = os.listdir(os.path.join(DATA_PATH_KEYPOINT_TESTING, action, actionSubFolder))
-  #     for _ in range (len(allKeyPointData)): 
-  #         ## print (os.path.join(DATA_PATH_KEYPOINT_TESTING, action, actionSubFolder, "{}.npy".format(sequence) ) )
-  #         pathFile = os.path.join(DATA_PATH_KEYPOINT_TESTING, action, actionSubFolder, "{}.npy".format(sequences))
-  #         if (os.path.isfile(pathFile)==False):
-  #           pathFile = os.path.join(DATA_PATH_KEYPOINT_TESTING, action, actionSubFolder, "{}.npy".format(tempSequencesWhichExist))
-  #         else:
-  #           tempSequencesWhichExist = sequences
-          
-  #         res = np.load(pathFile)
-  #         window.append(res)
-  #         sequences +=1
-  #     ### this for frame which have different frame
-  #     ### sequencesTesting.append(window)
-  #     ### labelsTesting.append(action)
-  #     ### xTesting[indexVideoTesting] = window
-  #     ### yTesting[indexVideoTesting] = action
-
-  #     ### interpolation in here
-  #     window        = np.asarray(window)
-  #     array_reshape = np.reshape(window, window.shape[0]* window.shape[1])
-  #     size          = 78 * window.shape[1]
-  #     result_interpolation  = TimeSeriesResampler(sz = size).fit_transform(array_reshape) 
-  #     final_window  = np.reshape(result_interpolation, (78, window.shape[1]))
-
-
-  #     xTesting.append(final_window)
-  #     yTesting.append(action)
-
-  #     indexVideoTesting += 1
-
-  # ## save keypoint
-  # pathKeypoint  = os.path.join(pathWorkspace, 'DataSaveOnNumpy',  PATH_SAVE_TEST_NUMPY)
-  # np.save (pathKeypoint, xTesting)
-  # pathLabel     = os.path.join(pathWorkspace, 'DataSaveOnNumpy',  PATH_SAVE_LABEL_TEST_NUMPY)
-  # np.save (pathLabel, yTesting)
-
+    tempLoadExtractedKeypoint.LoadKeypoint(
+                                PATH_WORKSPACE,
+                                FOLDER_PATH_TESTING,
+                                FILE_NAME_TEST_NUMPY,
+                                FILE_NAME_LABEL_TEST_NUMPY)
