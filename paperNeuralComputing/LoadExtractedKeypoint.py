@@ -95,18 +95,18 @@ class LoadExtractedKeypoint:
 if __name__ == "__main__":
     PATH_WORKSPACE = '/home/bra1n/Documents/signLanguage/paperNeuralComputing'
 
-    FOLDER_PATH_TRAINING = 'KeypointTrainingWLASL100_normalization_option2'
-    FOLDER_PATH_VALIDATION = 'KeypointValidationWLASL100_normalization_option2'
-    FOLDER_PATH_TESTING = 'KeypointTestingWLASL100_normalization_option2'
+    FOLDER_PATH_TRAINING = "Keypoint{}WLASL100_normalization_option2".format("Training")
+    FOLDER_PATH_VALIDATION = "Keypoint{}WLASL100_normalization_option2".format("Validation")
+    FOLDER_PATH_TESTING = "Keypoint{}WLASL100_normalization_option2".format("Testing")
 
-    FILE_NAME_TRAINING_NUMPY = 'TrainingAllFrame_WLASL_100Class_option2'
-    FILE_NAME_LABEL_TRAINING_NUMPY = 'TrainingLabelAllFrame_WLASL_100Class_option2'
+    FILE_NAME_TRAINING_NUMPY = "{}AllFrame_WLASL_100Class_option2".format("Training")
+    FILE_NAME_LABEL_TRAINING_NUMPY = "{}AllFrame_WLASL_100Class_option2".format("TrainingLabel")
 
-    FILE_NAME_VALIDATION_NUMPY = 'ValidationAllFrame_WLASL_100Class_option2'
-    FILE_NAME_LABEL_VALIDATION_NUMPY = 'ValidationLabelAllFrame_WLASL_100Class_option2'
+    FILE_NAME_VALIDATION_NUMPY = "{}AllFrame_WLASL_100Class_option2".format("Validation")
+    FILE_NAME_LABEL_VALIDATION_NUMPY = "{}AllFrame_WLASL_100Class_option2".format("ValidationLabel") 
 
-    FILE_NAME_TEST_NUMPY = 'TestingAllFrame_WLASL_100Class_option2'
-    FILE_NAME_LABEL_TEST_NUMPY = 'TestingLabelAllFrame_WLASL_100Class_option2'
+    FILE_NAME_TEST_NUMPY = "{}AllFrame_WLASL_100Class_option2".format("Testing")
+    FILE_NAME_LABEL_TEST_NUMPY = "{}AllFrame_WLASL_100Class_option2".format("TestingLabel")
 
     FOLDER_SAVE_NUMPY = os.path.join(PATH_WORKSPACE, 'DataSaveOnNumpy')
     if not os.path.exists(FOLDER_SAVE_NUMPY):
@@ -129,7 +129,7 @@ if __name__ == "__main__":
                                 PATH_WORKSPACE,
                                 FOLDER_PATH_VALIDATION,
                                 FILE_NAME_VALIDATION_NUMPY,
-                                FILE_NAME_LABEL_TRAINING_NUMPY)
+                                FILE_NAME_LABEL_VALIDATION_NUMPY)
     
     tempLoadExtractedKeypoint.LoadKeypoint(
                                 PATH_WORKSPACE,
