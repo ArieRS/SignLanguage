@@ -183,16 +183,25 @@ class ExtractTheKeypoint:
                 # resultEachFrame.append([image,tempResults])
                 
                 # extract the keypoint
-                keypoints, is_frame_skip = self.extract_keypoints(tempResults, image, option=option)         
+                keypoints, is_frame_skip = self.extract_keypoints(tempResults, 
+                                                                  image, 
+                                                                  option=option)         
 
                 if ((is_save==True) and (is_frame_skip==False)):
-                    #increment
+                    # increment
                     indexNumberFrame += 1
-                    # # Break gracefully
-                    new_dir = str(os.path.join(pathWorkspace,data_path_keypoint, actionLabel, movieNameParam))+'/'
+                    # Break gracefully
+                    new_dir = str(os.path.join(pathWorkspace, 
+                                               data_path_keypoint, 
+                                               actionLabel, 
+                                               movieNameParam))+'/'
                     if not os.path.isdir(new_dir):
                         os.makedirs(new_dir)
-                    npy_path = os.path.join(pathWorkspace,data_path_keypoint, actionLabel, str(movieNameParam), str(indexNumberFrame))
+                    npy_path = os.path.join(pathWorkspace,
+                                            data_path_keypoint, 
+                                            actionLabel, 
+                                            str(movieNameParam), 
+                                            str(indexNumberFrame))
                     np.save(npy_path, keypoints)
                     # cv2.imshow("show mediapipe",image)
                     # cv2.waitKey(0)
