@@ -119,23 +119,24 @@ class SplittingData:
 
 if __name__ == "__main__":
     base_dir = "/home/bra1n/Documents/signLanguage"
-    train_split = os.path.join(base_dir, 'preprocess/nslt_100.json')
+    variableClass = '1000'
+    train_split = os.path.join(base_dir, 'preprocess/nslt_{}.json'.format(variableClass))
     save_path_param = os.path.join(base_dir, 'paperNeuralComputing')
     # copying dataset into folder
     # next extract intokeypoint folder, firstly watch i3d method what is the effect on start and end of frame
     # had been executed
     dataset = SplittingData(train_split, 'train', base_dir, None, 
                             save_path_param=save_path_param,
-                            training_name_folder='DataTraining100',
-                            validation_name_folder='DataValidation100',
-                            test_name_folder='DataTesting100')
+                            training_name_folder='DataTraining{}'.format(variableClass),
+                            validation_name_folder='DataValidation{}'.format(variableClass),
+                            test_name_folder='DataTesting{}'.format(variableClass))
     dataset_test = SplittingData(train_split, 'test', base_dir, None, 
                                  save_path_param=save_path_param,
-                                 training_name_folder='DataTraining100',
-                                 validation_name_folder='DataValidation100',
-                                 test_name_folder='DataTesting100')
+                                 training_name_folder='DataTraining{}'.format(variableClass),
+                                 validation_name_folder='DataValidation{}'.format(variableClass),
+                                 test_name_folder='DataTesting{}'.format(variableClass))
     dataset = SplittingData(train_split, 'val', base_dir, None, 
                             save_path_param=save_path_param,
-                            training_name_folder='DataTraining100',
-                            validation_name_folder='DataValidation100',
-                            test_name_folder='DataTesting100')
+                            training_name_folder='DataTraining{}'.format(variableClass),
+                            validation_name_folder='DataValidation{}'.format(variableClass),
+                            test_name_folder='DataTesting{}'.format(variableClass))

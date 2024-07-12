@@ -38,10 +38,13 @@ class ExtractTheKeypoint:
             rh = np.array([[res.x, res.y, res.z] for res in results_keypoint.right_hand_landmarks.landmark]).flatten() if results_keypoint.right_hand_landmarks else np.zeros(21*3)
             return np.concatenate([pose, face, lh, rh])
         elif (option == 1):
-            pose = np.array([[res.x, res.y] for res in results_keypoint.pose_landmarks.landmark]).flatten() if results_keypoint.pose_landmarks else np.zeros(33*2)
-            lh = np.array([[res.x, res.y] for res in results_keypoint.left_hand_landmarks.landmark]).flatten() if results_keypoint.left_hand_landmarks else np.zeros(21*2)
-            rh = np.array([[res.x, res.y] for res in results_keypoint.right_hand_landmarks.landmark]).flatten() if results_keypoint.right_hand_landmarks else np.zeros(21*2)
-            return np.concatenate([pose, lh, rh]), is_frame_skip    
+            if (results_keypoint.pose_landmarks is not None):
+                pose, lh, rh = self._ext_tracking_points(results_keypoint)
+                return np.concatenate([pose, lh, rh]), is_frame_skip
+            else:
+                flatten = []
+                is_frame_skip = True
+            return flatten, is_frame_skip    
         elif (option == 2):
             height, width, _ = image.shape
             
@@ -51,7 +54,6 @@ class ExtractTheKeypoint:
                 # nose_y = results_keypoint.pose_landmarks.landmark[0].y
                 # print (f'{nose_x = } ; {nose_y = }')
                 body, lhand, rhand = self._ext_tracking_points(results_keypoint)
-                # print(f'{body.shape=}')
                 
                 # Project to image plane.
                 height, width, _ = image.shape
@@ -59,10 +61,8 @@ class ExtractTheKeypoint:
                 lhand = self._project(lhand, width, height)
                 rhand = self._project(rhand, width, height)
 
-                # print(f'{body.shape=}')
                 base_nose_x = body[0, 0]
                 base_nose_y = body[0, 1]
-                # print (f'{base_nose_x = } ; {base_nose_y = }')
 
                 all_keypoint = np.concatenate([body, lhand, rhand])
                 # print(f'{all_keypoint[1,:]}')
@@ -74,10 +74,6 @@ class ExtractTheKeypoint:
                 flatten = std.flatten()
                 is_frame_skip = False
 
-                # print (f'{std.shape}')
-                # print (f'{std[0,:]}')
-                # print (f'{std[1,:]}')
-                # print (f'{flatten.shape}')
             else:
                 flatten = []
                 is_frame_skip = True
@@ -113,7 +109,7 @@ class ExtractTheKeypoint:
         if inplace is True:
             temp = kpts
         else:
-            temp = copy.deepcopy(kpts)
+            temp = np.copy(kpts)
 
         depth = max(width, height)
         xs = temp[:, 0]
@@ -272,43 +268,22 @@ class ExtractTheKeypoint:
 
 if __name__ == "__main__":
     # data training extract
-    pathWorkspace     = '/home/bra1n/Documents/signLanguage/paperNeuralComputing'
-    #'/home/tamlab/Documents/SignLanguage/CodeInServer/paper_10_class'
+    pathWorkspace = '/home/bra1n/Documents/signLanguage/paperNeuralComputing'
+    variableClass = '100'
+    detailFileName = 'without_normalization_option1'  # 'normalization_option2'
+    optionParam = 1  # 2
   
-    filePathTraining  = os.path.join(pathWorkspace, "DataTraining100")
-    filePathValidation  = os.path.join(pathWorkspace, "DataValidation100")
-    filePathTesting   = os.path.join(pathWorkspace, "DataTesting100")
+    filePathTraining  = os.path.join(pathWorkspace, "DataTraining{}".format(variableClass))
+    filePathValidation  = os.path.join(pathWorkspace, "DataValidation{}".format(variableClass))
+    filePathTesting   = os.path.join(pathWorkspace, "DataTesting{}".format(variableClass))
     
-    # option = 0
-    # DATA_PATH_TRAINING_SAVE = 'KeypointTrainingWLASL100'
-    # DATA_PATH_TESTING_SAVE  = 'KeypointTestingWLASL100'
-    # PATH_TRAINING_CSV  = 'KeypointTrainingWLASL100.csv'
-    # PATH_TESTING_CSV   = 'KeypointTestingWLASL100.csv'
+    DATA_PATH_TRAINING_SAVE = 'KeypointTrainingWLASL{}_{}'.format(variableClass, detailFileName)
+    DATA_PATH_VALIDATION_SAVE = 'KeypointValidationWLASL{}_{}'.format(variableClass, detailFileName)
+    DATA_PATH_TESTING_SAVE = 'KeypointTestingWLASL{}_{}'.format(variableClass, detailFileName)
 
-    # option = 2
-    DATA_PATH_TRAINING_SAVE = 'KeypointTrainingWLASL100_normalization_option2'
-    DATA_PATH_VALIDATION_SAVE = 'KeypointValidationWLASL100_normalization_option2'
-    DATA_PATH_TESTING_SAVE = 'KeypointTestingWLASL100_normalization_option2'
-
-    PATH_TRAINING_CSV     = 'KeypointTrainingWLASL100_normalization_option2.csv'
-    PATH_VALIDATION_CSV   = 'KeypointValidationWLASL100_normalization_option2.csv'
-    PATH_TESTING_CSV      = 'KeypointTestingWLASL100_normalization_option2.csv'
-    
-    '''
-    
-
-    # option = 2
-
-
-    DATA_PATH_TRAINING_SAVE = 'KeypointTrainingWLASL100_without_normalization_option2'
-    DATA_PATH_VALIDATION_SAVE = 'KeypointValidationWLASL100_without_normalization_option2'
-    DATA_PATH_TESTING_SAVE = 'KeypointTestingWLASL100_without_normalization_option2'
-
-
-    PATH_TRAINING_CSV = 'KeypointTrainingWLASL100_without_normalization_option2.csv'
-    PATH_VALIDATION_CSV = 'KeypointValidationWLASL100_without_normalization_option2.csv'
-    PATH_TESTING_CSV = 'KeypointTestingWLASL100_without_normalization_option2.csv'
-    '''
+    PATH_TRAINING_CSV     = 'KeypointTrainingWLASL{}_{}.csv'.format(variableClass, detailFileName)
+    PATH_VALIDATION_CSV   = 'KeypointValidationWLASL{}_{}.csv'.format(variableClass, detailFileName)
+    PATH_TESTING_CSV      = 'KeypointTestingWLASL{}_{}.csv'.format(variableClass, detailFileName)
    
     objectExtract = ExtractTheKeypoint()
     ''' 
@@ -317,6 +292,15 @@ if __name__ == "__main__":
     2 pose, left and right without z with normalization
     '''
 
-    objectExtract.extractVideoData(pathWorkspace, filePathTesting, DATA_PATH_TESTING_SAVE, PATH_TESTING_CSV, option=2)
-    objectExtract.extractVideoData(pathWorkspace, filePathTraining, DATA_PATH_TRAINING_SAVE, PATH_TRAINING_CSV, option=2)
-    objectExtract.extractVideoData(pathWorkspace, filePathValidation, DATA_PATH_VALIDATION_SAVE, PATH_VALIDATION_CSV, option=2)
+    objectExtract.extractVideoData(pathWorkspace, filePathTraining, 
+                                   DATA_PATH_TRAINING_SAVE, 
+                                   PATH_TRAINING_CSV, 
+                                   option=optionParam)
+    objectExtract.extractVideoData(pathWorkspace, filePathTesting, 
+                                   DATA_PATH_TESTING_SAVE, 
+                                   PATH_TESTING_CSV, 
+                                   option=optionParam)
+    objectExtract.extractVideoData(pathWorkspace, filePathValidation, 
+                                   DATA_PATH_VALIDATION_SAVE, 
+                                   PATH_VALIDATION_CSV, 
+                                   option=optionParam)
