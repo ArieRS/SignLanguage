@@ -269,9 +269,9 @@ class ExtractTheKeypoint:
 if __name__ == "__main__":
     # data training extract
     pathWorkspace = '/home/bra1n/Documents/signLanguage/paperNeuralComputing'
-    variableClass = '100'
-    detailFileName = 'without_normalization_option1'  # 'normalization_option2'
-    optionParam = 1  # 2
+    variableClass = '2000'
+    detailFileName = 'normalization_option2' # 'without_normalization_option1' # 'normalization_option2'
+    optionParam = 2  # 1 # 2
   
     filePathTraining  = os.path.join(pathWorkspace, "DataTraining{}".format(variableClass))
     filePathValidation  = os.path.join(pathWorkspace, "DataValidation{}".format(variableClass))
