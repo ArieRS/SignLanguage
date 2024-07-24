@@ -74,7 +74,9 @@ def extract_each_frame(pathWorkspace="", filePath=""):
                 print("break process_image_extract_keypoint")
                 break
 
-            imageZeros = np.zeros([frame.shape[0], frame.shape[1], 3], dtype=np.uint8)
+            imageZeros = np.zeros([frame.shape[0], 
+                                   frame.shape[1], 3], 
+                                   dtype=np.uint8)
             imageZeros[:, :] = 255
             # Make detections
             image, tempResults = mediapipe_detection(frame, holistic)
@@ -92,7 +94,7 @@ def extract_each_frame(pathWorkspace="", filePath=""):
             # cv2.imshow("OK",frame)
             # cv2.imshow("OK1",imageZeros)
 
-            newDir = os.path.join(pathWorkspace, "vizualizeKeypoint")
+            newDir = os.path.join(pathWorkspace, "visualizeKeypoint")
             if not os.path.isdir(newDir):
                 os.makedirs(newDir)
 
@@ -105,9 +107,34 @@ def extract_each_frame(pathWorkspace="", filePath=""):
         cap.release()
         cv2.destroyAllWindows()
 
-def drawKeypointFromExtractKeypoint():
-    pass
 
+def drawKeypointFromExtractKeypoint(pathWorkspace, 
+                                    folder_path_keypoint):
+        xTemp = []
+        newXTemp = []
+        yTemp = []
+        DATA_PATH_KEYPOINT = os.path.join(pathWorkspace, folder_path_keypoint)
+        actionsVideoInput = np.array(os.listdir(DATA_PATH_KEYPOINT))
+
+        for tempData in actionsVideoInput:
+            keypointData = np.load(os.path.join(DATA_PATH_KEYPOINT, tempData))
+            namefileSplit = tempData.split(".")
+            # print(keypointData[0])
+            for ii in range(0, keypointData.shape[0], 2):
+                plt.scatter(keypointData[ii], keypointData[ii+1]*-1, color="blue")
+            plt.axis('on')
+            plt.xlabel("X axis")
+            plt.ylabel("Y axis")
+
+            newDir = os.path.join(pathWorkspace, 
+                                  "visualizeNormalizeAndNot", 
+                                  folder_path_keypoint)
+            
+            if not os.path.isdir(os.path.join(newDir)):
+                os.makedirs(os.path.join(newDir))
+    
+            plt.savefig(os.path.join(newDir, namefileSplit[0]))
+            plt.clf()
 
 if __name__ == '__main__':
     resultEachImage = []
@@ -116,5 +143,15 @@ if __name__ == '__main__':
     pathWorkspace = '/home/bra1n/Documents/signLanguage/paperNeuralComputing'
     filePath = "DataTraining100/hat/26726.mp4"
     allTempResult = []
+    # drawing one videos
+    # extract_each_frame(pathWorkspace=pathWorkspace, filePath=filePath)
 
-    extract_each_frame(pathWorkspace=pathWorkspace, filePath=filePath)
+
+    label="accident"
+    idVideo= "00627"
+    pathDataToDraw = "Keypoint{}WLASL100_normalization_option2/{}/{}".format("Training",
+                                                                         label,
+                                                                         idVideo)
+    # drawing 1 folder
+    drawKeypointFromExtractKeypoint(pathWorkspace, 
+                                    pathDataToDraw)
