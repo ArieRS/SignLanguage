@@ -1,24 +1,7 @@
 # sign language recognition
-
-
-## tips about dependency
-1. problem with opencv 
-- https://stackoverflow.com/questions/67429385/error-when-importing-cv2-on-anaconda-prompt-but-it-is-working-on-jupyter-noteboo
-2. sudo apt --fix-broken install
-3. install numpy cuda https://www.nvidia.com/en-us/glossary/numpy/
-in this project use cupy version 12 because we use cude version 12 (https://docs.cupy.dev/en/stable/install.html).
-To check cuder version driver by using nvidia-smi
-
-Install Tensorflow
-
-https://docs.vultr.com/how-to-install-tensorflow-on-ubuntu-22-04-79647
-
-please choose one of tensorflow or thorch because has conflict for the depedency
-
-
-if you want add more metric on tensorflow, you can check it in here
-https://stackoverflow.com/questions/68596302/f1-score-metric-per-class-in-tensorflow
-
-
-
-
+Step to run the code
+1. Set the directory in each code, then run the program in the order as below.
+2. LoadData.py has function to copy video dataset from WLASL dataset into target folder
+3. ExtractTheKeypoint.py uses to extract the keypoint from video dataset, write on csv the video name, total extracted frames and the action labels
+4. LoadExtractedKeypoint.py has function to load the data and save into .npy
+5. Run the classification algorithm such as Sign_language_GRUDropout.py, Sign_language_BiGRUDropout.py, ReservoirRewriteMulti_withoutOptunaEdit.py, etc
