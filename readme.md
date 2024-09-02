@@ -5,3 +5,7 @@ Step to run the code
 3. ExtractTheKeypoint.py uses to extract the keypoint from video dataset, write on csv the video name, total extracted frames and the action labels
 4. LoadExtractedKeypoint.py has function to load the data and save into .npy
 5. Run the classification algorithm such as Sign_language_GRUDropout.py, Sign_language_BiGRUDropout.py, ReservoirRewriteMulti_withoutOptunaEdit.py, etc
+
+# dataset
+It can be accessed on https://dxli94.github.io/WLASL/
+
